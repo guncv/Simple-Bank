@@ -10,7 +10,7 @@ CREATE TABLE "entries" (
   "id" bigserial PRIMARY KEY,
   "account_id" bigint NOT NULL,
   "amount" bigint NOT NULL,
-  "created_at" timestamptz DEFAULT (now()),
+  "created_at" timestamptz NOT NULL DEFAULT (now()),
   CONSTRAINT fk_entries_account FOREIGN KEY ("account_id") REFERENCES "accounts" ("id") ON DELETE CASCADE
 );
 
@@ -19,7 +19,7 @@ CREATE TABLE "transfers" (
   "from_account_id" bigint NOT NULL,
   "to_account_id" bigint NOT NULL,
   "amount" bigint NOT NULL,
-  "created_at" timestamptz DEFAULT (now()),
+  "created_at" timestamptz NOT NULL DEFAULT (now()),
   CONSTRAINT fk_transfers_from_account FOREIGN KEY ("from_account_id") REFERENCES "accounts" ("id") ON DELETE CASCADE,
   CONSTRAINT fk_transfers_to_account FOREIGN KEY ("to_account_id") REFERENCES "accounts" ("id") ON DELETE CASCADE,
   CONSTRAINT check_positive_amount CHECK ("amount" > 0)

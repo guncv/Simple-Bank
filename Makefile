@@ -1,4 +1,4 @@
-.PHONY: createdb dropdb migrate-up migrate-down migrate-force sqlcddd
+.PHONY: createdb dropdb migrate-up migrate-down migrate-force sqlcddd test
 
 createdb:
 	docker exec -t simplebank-postgres createdb --username=guncv --owner=guncv simplebank
@@ -23,3 +23,6 @@ migrate-version:
 
 sqlc: 
 	sqlc generate
+
+test:
+	go test -v -cover ./...
