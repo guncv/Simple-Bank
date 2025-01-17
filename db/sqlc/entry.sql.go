@@ -36,7 +36,8 @@ func (q *Queries) CreateEntry(ctx context.Context, arg CreateEntryParams) (Entry
 }
 
 const deleteEntry = `-- name: DeleteEntry :exec
-DELETE FROM entries WHERE id = $1
+DELETE FROM entries 
+WHERE id = $1
 `
 
 func (q *Queries) DeleteEntry(ctx context.Context, id int64) error {
@@ -45,7 +46,9 @@ func (q *Queries) DeleteEntry(ctx context.Context, id int64) error {
 }
 
 const getEntry = `-- name: GetEntry :one
-SELECT id, account_id, amount, created_at FROM entries WHERE id = $1 LIMIT 1
+SELECT id, account_id, amount, created_at FROM entries 
+WHERE id = $1 
+LIMIT 1
 `
 
 func (q *Queries) GetEntry(ctx context.Context, id int64) (Entry, error) {
@@ -61,7 +64,10 @@ func (q *Queries) GetEntry(ctx context.Context, id int64) (Entry, error) {
 }
 
 const listEntry = `-- name: ListEntry :many
-SELECT id, account_id, amount, created_at FROM entries ORDER BY id LIMIT $1 OFFSET $2
+SELECT id, account_id, amount, created_at FROM entries 
+ORDER BY id 
+LIMIT $1 
+OFFSET $2
 `
 
 type ListEntryParams struct {
@@ -98,7 +104,10 @@ func (q *Queries) ListEntry(ctx context.Context, arg ListEntryParams) ([]Entry, 
 }
 
 const updateEntry = `-- name: UpdateEntry :one
-UPDATE entries SET amount = $2 WHERE id = $1 RETURNING id, account_id, amount, created_at
+UPDATE entries 
+SET amount = $2 
+WHERE id = $1 
+RETURNING id, account_id, amount, created_at
 `
 
 type UpdateEntryParams struct {

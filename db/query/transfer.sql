@@ -8,13 +8,22 @@ INSERT INTO transfers (
 ) RETURNING *;
 
 -- name: GetTransfer :one
-SELECT * FROM transfers WHERE id = $1 LIMIT 1;
+SELECT * FROM transfers 
+WHERE id = $1 
+LIMIT 1;
 
 -- name: ListTransfer :many
-SELECT * FROM transfers ORDER BY id LIMIT $1 OFFSET $2;
+SELECT * FROM transfers 
+ORDER BY id 
+LIMIT $1 
+OFFSET $2;
 
 -- name: UpdateTransfer :one
-UPDATE transfers SET amount = $2 WHERE id = $1 RETURNING *;
+UPDATE transfers 
+SET amount = $2 
+WHERE id = $1 
+RETURNING *;
 
 -- name: DeleteTransfer :exec
-DELETE FROM transfers WHERE id = $1;
+DELETE FROM transfers 
+WHERE id = $1;
