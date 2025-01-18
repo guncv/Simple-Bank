@@ -1,3 +1,5 @@
+# This workflow will build a golang project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
 name: ci-test
 
 on:
@@ -8,51 +10,57 @@ on:
 
 jobs:
   build:
-    name: Build and Test
+    name: Test
     runs-on: ubuntu-latest
-
+    # Service containers to run with `container-job`
     services:
+      # Label used to access the service container
       postgres:
+        # Docker Hub image
         image: postgres:12
+        # Provide the password for postgres
         env:
           POSTGRES_USER: guncv
           POSTGRES_PASSWORD: 17554Guncv_26042003
           POSTGRES_DB: simplebank
         ports:
           - 5432:5432
+        # Set health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
-          --health-retries 10  # Increased retries for stability
-
+          --health-retries 5
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: "1.23" # ✅ Updated to Go 1.23 for compatibility
+          go-version: "1.20"
+        id: go
+
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v4.2.2
 
       - name: Install migrate CLI
         run: |
           curl -L https://github.com/golang-migrate/migrate/releases/download/v4.16.2/migrate.linux-amd64.tar.gz | tar xvz
           sudo mv migrate /usr/local/bin/
-          which migrate  # Verify installation
+          which migrate
 
-      - name: Wait for PostgreSQL to be ready
-        run: |
-          until pg_isready -h postgres -p 5432; do
-            echo "Waiting for PostgreSQL..."
-            sleep 2
-          done
+          - name: Wait for PostgreSQL to be ready
+          run: |
+            until pg_isready -h postgres -p 5432; do
+              echo "Waiting for PostgreSQL..."
+              sleep 2
+            done
 
       - name: Generate SQLC Code # ✅ Generate SQL code before migration
         run: make sqlc
 
-      - name: Run Migrations
+      - name: Run migrations
         run: make migrate-up
 
-      - name: Run Tests
+      - name: Test
         run: make test
