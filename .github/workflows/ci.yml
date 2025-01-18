@@ -49,6 +49,12 @@ jobs:
           sudo mv migrate /usr/local/bin/
           which migrate
 
+      - name: Install sqlc # ✅ Install sqlc CLI
+        run: |
+          curl -sL https://github.com/sqlc-dev/sqlc/releases/latest/download/sqlc_linux_amd64.tar.gz | tar -xvz
+          sudo mv sqlc /usr/local/bin/
+          which sqlc  # Verify installation
+
       - name: Generate SQLC Code # ✅ Generate SQL code before migration
         run: make sqlc
 
