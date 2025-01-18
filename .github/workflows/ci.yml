@@ -22,7 +22,7 @@ jobs:
         env:
           POSTGRES_USER: guncv
           POSTGRES_PASSWORD: 17554Guncv_26042003
-          POSTGRES_DB: simple_bank
+          POSTGRES_DB: simplebank
         ports:
           - 5432:5432
         # Set health checks to wait until postgres has started
