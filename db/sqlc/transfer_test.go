@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func createRandomTransfer(t *testing.T) Transfer {
+func createRandomTransfer(t *testing.T) Transfers {
 	arg := CreateTransferParams{
 		FromAccountID: 1,
 		ToAccountID:   2,
