@@ -1,4 +1,4 @@
-.PHONY: createdb dropdb migrate-up migrate-down migrate-force sqlcddd test server mockgen
+.PHONY: createdb dropdb migrate-up migrate-down migrate-force sqlcddd test run mockgen
 
 createdb:
 	docker exec -t simplebank-postgres createdb --username=guncv --owner=guncv simplebank
@@ -30,5 +30,5 @@ mock:
 test:
 	go test -v -cover ./...
 
-server:
+run:
 	go run main.go

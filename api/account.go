@@ -68,19 +68,23 @@ type listAccountRequest struct {
 func (server *Server) listAccounts(ctx *gin.Context) {
 	var req listAccountRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid query parameters"})
 		return
 	}
 
-	arg := db.ListAccountParams{
+	if req.PageID < 1 || req.PageSize < 1 || req.PageSize > 100 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid pagination parameters"})
+		return
+	}
+
+	args := db.ListAccountParams{
 		Limit:  req.PageSize,
 		Offset: (req.PageID - 1) * req.PageSize,
 	}
 
-	accounts, err := server.store.ListAccount(ctx, arg)
+	accounts, err := server.store.ListAccount(ctx, args)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-		return
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "could not retrieve accounts"})
 	}
 
 	ctx.JSON(http.StatusOK, accounts)
