@@ -1,4 +1,4 @@
-.PHONY: createdb dropdb migrate-up migrate-down migrate-force sqlcddd test run mockgen migrate-up1 migrate-down1
+.PHONY: createdb dropdb migrate-up migrate-down migrate-force sqlcddd test run mockgen migrate-up1 migrate-down1 initdb
 
 createdb:
 	docker exec -t simplebank-postgres createdb --username=guncv --owner=guncv simplebank
@@ -8,24 +8,24 @@ dropdb:
 
 # Apply all up migrations
 migrate-up:
-	migrate -path db/migration -database "postgresql://guncv:17554Guncv_26042003@localhost:5432/simplebank?sslmode=disable" --verbose up
+	migrate -path db/migration -database "postgresql://user:password@localhost:5432/simple_bank?sslmode=disable" --verbose up
 
 # Roll back all migrations
 migrate-down:
-	migrate -path db/migration -database "postgresql://guncv:17554Guncv_26042003@localhost:5432/simplebank?sslmode=disable" --verbose down
+	migrate -path db/migration -database "postgresql://user:password@localhost:5432/simple_bank?sslmode=disable" --verbose down
 
 migrate-up1:
-	migrate -path db/migration -database "postgresql://guncv:17554Guncv_26042003@localhost:5432/simplebank?sslmode=disable" --verbose up 1
+	migrate -path db/migration -database "postgresql://user:password@localhost:5432/simple_bank?sslmode=disable" --verbose up 1
 
 migrate-down1:
-	migrate -path db/migration -database "postgresql://guncv:17554Guncv_26042003@localhost:5432/simplebank?sslmode=disable" --verbose down 1
+	migrate -path db/migration -database "postgresql://user:password@localhost:5432/simple_bank?sslmode=disable" --verbose down 1
 
 # Force reset migration to version 1
 migrate-force:
-	migrate -path db/migration -database "postgresql://guncv:17554Guncv_26042003@localhost:5432/simplebank?sslmode=disable" force 1
+	migrate -path db/migration -database "postgresql://user:password@localhost:5432/simple_bank?sslmode=disable" force 1
 
 migrate-version:
-	migrate -path db/migration -database "postgresql://guncv:17554Guncv_26042003@localhost:5432/simplebank?sslmode=disable" version
+	migrate -path db/migration -database "postgresql://user:password@localhost:5432/simple_bank?sslmode=disable" version
 
 sqlc: 
 	sqlc generate
@@ -38,3 +38,11 @@ test:
 
 run:
 	go run main.go
+
+initdb:
+	docker compose -f docker-compose.db.yaml up -d
+
+	@echo "⏳ Waiting for database to be ready..."
+	@until docker exec postgres12 pg_isready -U user -d simplebank; do sleep 1; done
+
+	migrate -path db/migration -database "postgresql://user:password@localhost:5432/simple_bank?sslmode=disable" --verbose up

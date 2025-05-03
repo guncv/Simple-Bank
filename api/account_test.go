@@ -15,6 +15,7 @@ import (
 	mockdb "github.com/guncv/Simple-Bank/db/mock"
 	db "github.com/guncv/Simple-Bank/db/sqlc"
 	"github.com/guncv/Simple-Bank/util"
+	"github.com/lib/pq"
 	"github.com/stretchr/testify/require"
 )
 
@@ -127,6 +128,24 @@ func TestCreateAccountAPI(t *testing.T) {
 			},
 		},
 		{
+			name: "UniqueViolation",
+			body: gin.H{
+				"owner":    "alice",
+				"currency": "USD",
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					CreateAccount(gomock.Any(), gomock.Any()).
+					Times(1).
+					Return(db.Accounts{}, &pq.Error{
+						Code: "23505",
+					})
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusForbidden, recorder.Code)
+			},
+		},
+		{
 			name: "InternalError",
 			body: gin.H{
 				"owner":    account.Owner,
@@ -155,9 +174,22 @@ func TestCreateAccountAPI(t *testing.T) {
 			},
 		},
 		{
-			name: "InvalidBody",
+			name: "InvalidOwnerName",
 			body: gin.H{
-				"owner": account.Owner,
+				"currency": account.Currency,
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().CreateAccount(gomock.Any(), gomock.Any()).Times(0)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusBadRequest, recorder.Code)
+			},
+		},
+		{
+			name: "InvalidCurrency",
+			body: gin.H{
+				"owner":    account.Owner,
+				"currency": "INVALID",
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().CreateAccount(gomock.Any(), gomock.Any()).Times(0)
