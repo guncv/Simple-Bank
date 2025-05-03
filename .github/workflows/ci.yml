@@ -52,7 +52,7 @@ jobs:
       - name: Wait for PostgreSQL to be ready
         run: |
           for i in {1..30}; do
-            if pg_isready -h postgres12 -p 5432 -U guncv; then
+            if pg_isready -h localhost -p 5432 -U guncv; then
               echo "PostgreSQL is ready!"
               break
             fi
@@ -64,7 +64,7 @@ jobs:
         run: make sqlc
 
       - name: Run Migrations
-        run: make migrate-up
+        run: make migrate-ci-up
 
       - name: Run Tests
         run: make test

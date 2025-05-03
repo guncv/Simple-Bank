@@ -10,6 +10,9 @@ dropdb:
 migrate-up:
 	migrate -path db/migration -database "postgresql://user:password@postgres12:5432/simple_bank?sslmode=disable" --verbose up
 
+migrate-ci-up:
+	migrate -path db/migration -database "postgresql://user:password@localhost:5432/simple_bank?sslmode=disable" --verbose up
+
 # Roll back all migrations
 migrate-down:
 	migrate -path db/migration -database "postgresql://user:password@postgres12:5432/simple_bank?sslmode=disable" --verbose down
