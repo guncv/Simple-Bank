@@ -66,5 +66,9 @@ jobs:
       - name: Run Migrations
         run: make migrate-ci-up
 
+      - name: Set up DB env
+        run: |
+          echo "DB_SOURCE=postgresql://user:password@localhost:5432/simple_bank?sslmode=disable" > app.env
+
       - name: Run Tests
         run: make test
