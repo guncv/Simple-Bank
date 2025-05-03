@@ -15,9 +15,9 @@ jobs:
       postgres:
         image: postgres:12
         env:
-          POSTGRES_USER: guncv
-          POSTGRES_PASSWORD: 17554Guncv_26042003
-          POSTGRES_DB: simplebank
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: simple_bank
         ports:
           - 5432:5432
         options: >-
