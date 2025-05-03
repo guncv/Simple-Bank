@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:12-alpine
+    container_name: postgres12
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: simple_bank
+    ports:
+      - "5432:5432"
+    networks:
+      - simplebank-network 
+  api: 
+      build: 
+        context: .
+        dockerfile: Dockerfile
+      restart: unless-stopped
+      ports:
+        - "8080:8080"
+      environment:
+        GIN_MODE: release
+        DB_SOURCE: postgresql://user:password@postgres12:5432/simple_bank?sslmode=disable
+      depends_on:
+        - postgres
+      networks:
+        - simplebank-network 
+      entrypoint: ["/app/wait-for.sh", "postgres12:5432", "--", "/app/start.sh"]
+      command: ["/app/main"]
+
+networks:
+  simplebank-network:
+    external: true
