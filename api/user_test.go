@@ -10,9 +10,11 @@ import (
 	"net/http/httptest"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
+	"github.com/google/uuid"
 	mockdb "github.com/guncv/Simple-Bank/db/mock"
 	db "github.com/guncv/Simple-Bank/db/sqlc"
 	"github.com/guncv/Simple-Bank/util"
@@ -233,6 +235,18 @@ func TestLoginUserAPI(t *testing.T) {
 					GetUser(gomock.Any(), gomock.Eq(user.Username)).
 					Times(1).
 					Return(user, nil)
+				store.EXPECT().
+					CreateSession(gomock.Any(), gomock.Any()).
+					Times(1).
+					Return(db.Sessions{
+						ID:           uuid.New(),
+						Username:     user.Username,
+						RefreshToken: "some-refresh-token",
+						UserAgent:    "test-agent",
+						ClientIp:     "127.0.0.1",
+						IsBlocked:    false,
+						ExpiresAt:    time.Now().Add(time.Minute * 15),
+					}, nil)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -250,6 +264,9 @@ func TestLoginUserAPI(t *testing.T) {
 					GetUser(gomock.Any(), gomock.Eq(user.Username)).
 					Times(1).
 					Return(db.Users{}, sql.ErrNoRows)
+				store.EXPECT().
+					CreateSession(gomock.Any(), gomock.Any()).
+					Times(0)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusNotFound, recorder.Code)

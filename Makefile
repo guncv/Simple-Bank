@@ -1,4 +1,4 @@
-.PHONY: createdb dropdb migrate-up migrate-down migrate-force sqlcddd test run build remove-img mockgen migrate-up1 migrate-down1 initdb network
+.PHONY: createdb dropdb migrate-up migrate-down migrate-force sqlcddd test reset build remove-img mockgen migrate-up1 migrate-down1 initdb network
 
 createdb:
 	docker exec -t simplebank-postgres createdb --username=guncv --owner=guncv simplebank
@@ -45,8 +45,5 @@ test:
 build:
 	docker compose build
 
-run:
-	docker compose up 
-
-rebuild:
+reset:
 	docker compose down && docker compose build --no-cache && docker compose up
