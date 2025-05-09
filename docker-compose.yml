@@ -28,8 +28,7 @@ services:
         - postgres
       networks:
         - simplebank-network 
-      entrypoint: ["/app/wait-for.sh", "postgres12:5432", "--", "/app/start.sh"]
-      command: ["/app/main"]
+      entrypoint: ["/app/wait-for.sh", "postgres12:5432", "--", "/app/main"]
 
 networks:
   simplebank-network:
