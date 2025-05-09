@@ -1,4 +1,4 @@
-.PHONY: createdb dropdb migrate-up migrate-down migrate-force sqlcddd test reset build remove-img mockgen migrate-up1 migrate-down1 initdb network
+.PHONY: createdb dropdb migrate-up migrate-down migrate-force sqlcddd test reset build remove-img mockgen migrate-up1 migrate-down1 initdb network proto
 
 createdb:
 	docker exec -t simplebank-postgres createdb --username=guncv --owner=guncv simplebank
@@ -47,3 +47,24 @@ build:
 
 reset:
 	docker compose down && docker compose build --no-cache && docker compose up
+
+proto: 
+	rm -f pb/*.go
+	protoc --proto_path=proto --go_out=pb --go_opt=paths=source_relative \
+	--go-grpc_out=pb --go-grpc_opt=paths=source_relative \
+	proto/*.proto
+
+evans: 
+	evans \
+		--host localhost \
+		--port 9090 \
+		--path proto \
+		--proto service_simple_bank.proto \
+		--proto rpc_create_user.proto \
+		--proto rpc_login_user.proto \
+		--proto user.proto \
+		repl
+
+
+
+
