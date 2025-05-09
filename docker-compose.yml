@@ -22,7 +22,7 @@ services:
         - "8080:8080"
         - "9090:9090"
       environment:
-        GIN_MODE: release
+        GIN_MODE: debug
         DB_SOURCE: postgresql://user:password@postgres12:5432/simple_bank?sslmode=disable
       depends_on:
         - postgres

@@ -60,6 +60,7 @@ func (server *Server) setupRouter() {
 }
 
 func (server *Server) Start(address string) error {
+
 	return server.router.Run(address)
 }
 
