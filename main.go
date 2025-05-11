@@ -18,6 +18,8 @@ import (
 	"github.com/guncv/Simple-Bank/gapi"
 	pb "github.com/guncv/Simple-Bank/pb"
 	"github.com/guncv/Simple-Bank/util"
+	"github.com/guncv/Simple-Bank/worker"
+	"github.com/hibiken/asynq"
 	_ "github.com/lib/pq"
 	"github.com/rakyll/statik/fs"
 	"github.com/rs/zerolog"
@@ -47,8 +49,17 @@ func main() {
 	runDBMigration(config.MigrationsURL, config.DBSource)
 
 	store := db.NewStore(conn)
-	go runGatewayServer(config, store)
-	runGrpcServer(config, store)
+
+	log.Info().Msgf("redis address: %s", config.RedisAddress)
+	redisOpt := asynq.RedisClientOpt{
+		Addr: config.RedisAddress,
+	}
+
+	taskDistributor := worker.NewRedisTaskDistributor(redisOpt)
+
+	go runTaskProcessor(redisOpt, store)
+	go runGatewayServer(taskDistributor, config, store)
+	runGrpcServer(taskDistributor, config, store)
 	// runGinServer(config, store)
 
 }
@@ -66,8 +77,8 @@ func runDBMigration(migrationURL string, dbSource string) {
 	log.Info().Msg("db migrated successfully")
 }
 
-func runGrpcServer(config util.Config, store db.Store) {
-	server, err := gapi.NewServer(config, store)
+func runGrpcServer(taskDistributor worker.TaskDistributor, config util.Config, store db.Store) {
+	server, err := gapi.NewServer(taskDistributor, config, store)
 	if err != nil {
 		log.Fatal().Msg("cannot create new server")
 	}
@@ -89,8 +100,17 @@ func runGrpcServer(config util.Config, store db.Store) {
 	}
 }
 
-func runGatewayServer(config util.Config, store db.Store) {
-	server, err := gapi.NewServer(config, store)
+func runTaskProcessor(redisOpt asynq.RedisClientOpt, store db.Store) {
+	taskProcessor := worker.NewRedisTaskProcessor(redisOpt, store)
+	log.Info().Msg("task processor started")
+
+	if err := taskProcessor.Start(); err != nil {
+		log.Fatal().Msg("fail to start task processor")
+	}
+}
+
+func runGatewayServer(taskDistributor worker.TaskDistributor, config util.Config, store db.Store) {
+	server, err := gapi.NewServer(taskDistributor, config, store)
 	if err != nil {
 		log.Fatal().Msg("cannot create new server")
 	}

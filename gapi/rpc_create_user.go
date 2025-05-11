@@ -3,10 +3,13 @@ package gapi
 import (
 	"context"
 	"log"
+	"time"
 
 	db "github.com/guncv/Simple-Bank/db/sqlc"
 	"github.com/guncv/Simple-Bank/pb"
 	"github.com/guncv/Simple-Bank/util"
+	"github.com/guncv/Simple-Bank/worker"
+	"github.com/hibiken/asynq"
 	"github.com/lib/pq"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
@@ -45,6 +48,21 @@ func (server *Server) CreateUser(ctx context.Context, req *pb.CreateUserRequest)
 		}
 		log.Printf("failed to create user: %s", err)
 		return nil, status.Errorf(codes.Internal, "failed to create user: %s", err)
+	}
+
+	// TODO: use db transaction
+	taskPayload := &worker.PayloadSendVerifyEmail{
+		Username: user.Username,
+	}
+
+	opts := []asynq.Option{
+		asynq.MaxRetry(10),
+		asynq.Queue(worker.QueueCritical),
+		asynq.ProcessIn(3 * time.Second),
+	}
+	if err := server.taskDistributor.DistributeTaskSendVerifyEmail(ctx, taskPayload, opts...); err != nil {
+		log.Printf("failed to distribute task: %s", err)
+		return nil, status.Errorf(codes.Internal, "failed to distribute task: %s", err)
 	}
 
 	resp := &pb.CreateUserResponse{

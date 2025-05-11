@@ -1,6 +1,14 @@
 version: '3.8'
 
 services:
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - simplebank-network
   postgres:
     image: postgres:12-alpine
     container_name: postgres12
@@ -24,8 +32,10 @@ services:
       environment:
         GIN_MODE: debug
         DB_SOURCE: postgresql://user:password@postgres12:5432/simple_bank?sslmode=disable
+        REDIS_ADDRESS: redis:6379
       depends_on:
         - postgres
+        - redis
       networks:
         - simplebank-network 
       entrypoint: ["/app/wait-for.sh", "postgres12:5432", "--", "/app/main"]

@@ -1,4 +1,4 @@
-.PHONY: createdb dropdb migrate-up migrate-down migrate-force sqlcddd test reset build remove-img mockgen migrate-up1 migrate-down1 initdb network proto
+.PHONY: createdb dropdb migrate-up migrate-down migrate-force sqlcddd test reset build remove-img mockgen migrate-up1 migrate-down1 initdb network proto redis
 
 createdb:
 	docker exec -t simplebank-postgres createdb --username=guncv --owner=guncv simplebank
@@ -69,6 +69,7 @@ evans:
 		--proto user.proto \
 		repl
 
-
+redis:
+	docker run -d --name redis -p 6379:6379 redis:latest
 
 
