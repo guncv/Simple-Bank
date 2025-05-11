@@ -23,3 +23,11 @@ func invalidArgumentError(violations []*errdetails.BadRequest_FieldViolation) er
 
 	return details.Err()
 }
+
+func unauthenticatedError(err error) error {
+	return status.Errorf(codes.Unauthenticated, "unauthenticated: %v", err)
+}
+
+func permissionDeniedError(err error) error {
+	return status.Errorf(codes.PermissionDenied, "permission denied: %v", err)
+}
