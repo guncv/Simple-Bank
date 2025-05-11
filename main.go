@@ -105,7 +105,7 @@ func runTaskProcessor(redisOpt asynq.RedisClientOpt, store db.Store) {
 	log.Info().Msg("task processor started")
 
 	if err := taskProcessor.Start(); err != nil {
-		log.Fatal().Msg("fail to start task processor")
+		log.Fatal().Err(err).Msg("fail to start task processor")
 	}
 }
 
