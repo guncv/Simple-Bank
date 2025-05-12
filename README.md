@@ -100,7 +100,6 @@ A modern banking backend service built in Go with high-performance APIs using **
 ### 🔧 Run Locally
 
 ```bash
-# Start servers
 make reset    # RESTful HTTP server via gRPC-Gateway and gRPC server with migration data
 ````
 
