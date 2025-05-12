@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/guncv/Simple-Bank/token"
+	"github.com/guncv/Simple-Bank/util"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
@@ -16,7 +17,7 @@ const (
 	authorizationTypeBearer = "bearer"
 )
 
-func (server *Server) authorizeUser(ctx context.Context) (*token.Payload, error) {
+func (server *Server) authorizeUser(ctx context.Context, accessibleRoles []util.Role) (*token.Payload, error) {
 	metadata, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return nil, status.Errorf(codes.Unauthenticated, "metadata is not provided")
@@ -45,5 +46,18 @@ func (server *Server) authorizeUser(ctx context.Context) (*token.Payload, error)
 		return nil, status.Errorf(codes.Unauthenticated, "access token is invalid: %v", err)
 	}
 
+	if !hasPermission(payload.Role, accessibleRoles) {
+		return nil, status.Errorf(codes.PermissionDenied, "you are not allowed to access this resource")
+	}
+
 	return payload, nil
+}
+
+func hasPermission(role util.Role, accessibleRoles []util.Role) bool {
+	for _, accessibleRole := range accessibleRoles {
+		if role == accessibleRole {
+			return true
+		}
+	}
+	return false
 }
