@@ -40,7 +40,7 @@ mock:
 	mockgen -destination db/mock/store.go -package mockdb github.com/guncv/Simple-Bank/db/sqlc Store
 
 test:
-	go test -v -cover ./...
+	go test -v -cover -short ./...
 
 build:
 	docker compose build

@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	db "github.com/guncv/Simple-Bank/db/sqlc"
+	"github.com/guncv/Simple-Bank/util"
 	"github.com/hibiken/asynq"
 	"github.com/rs/zerolog/log"
 )
@@ -52,6 +54,28 @@ func (processor *RedisTaskProcessor) ProcessTaskSendVerifyEmail(ctx context.Cont
 			return fmt.Errorf("user not found")
 		}
 		return fmt.Errorf("failed to get user: %w", err)
+	}
+
+	verifyEmail, err := processor.store.CreateVerifyEmail(ctx, db.CreateVerifyEmailParams{
+		Username:   user.Username,
+		Email:      user.Email,
+		SecretCode: util.RandomString(32),
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create verify email: %w", err)
+	}
+
+	subject := "Welcome to Simple Bank"
+	verifyUrl := fmt.Sprintf("http://localhost:8080/v1/verify_email?email_id=%d&secret_code=%s", verifyEmail.ID, verifyEmail.SecretCode)
+	content := fmt.Sprintf(`Hello %s,<br>
+		Thank you for registering with us!<br>
+		Please verify your email address by clicking the link below:<br>
+		<a href="%s">click here</a>
+		`, user.Username, verifyUrl)
+	to := []string{user.Email}
+
+	if err = processor.mailer.SendEmail(subject, content, to, nil, nil, nil); err != nil {
+		return fmt.Errorf("failed to send verify email: %w", err)
 	}
 
 	// TODO: Implement email verification
