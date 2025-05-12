@@ -16,6 +16,8 @@ import (
 	mockworker "github.com/guncv/Simple-Bank/worker/mock"
 	"github.com/lib/pq"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func randomUser(t *testing.T) (user db.Users, password string) {
@@ -133,33 +135,10 @@ func TestCreateUserAPI(t *testing.T) {
 			},
 			checkResponse: func(t *testing.T, p *pb.CreateUserResponse, err error) {
 				require.Error(t, err)
+				require.Equal(t, codes.Internal, status.Code(err))
 				require.Nil(t, p)
 			},
 		},
-		// {
-		// 	name: "FailedToSendVerifyEmail",
-		// 	req: &pb.CreateUserRequest{
-		// 		Username: user.Username,
-		// 		Password: password,
-		// 		FullName: user.FullName,
-		// 		Email:    user.Email,
-		// 	},
-		// 	buildStubs: func(store *mockdb.MockStore, taskDistributor *mockworker.MockTaskDistributor) {
-		// 		store.EXPECT().
-		// 			CreateUserTx(gomock.Any(), gomock.Any()).
-		// 			Times(1).
-		// 			Return(db.CreateUserTxResult{}, nil)
-
-		// 		taskDistributor.EXPECT().
-		// 			DistributeTaskSendVerifyEmail(gomock.Any(), taskPayload, gomock.Any()).
-		// 			Times(1).
-		// 			Return(sql.ErrConnDone)
-		// 	},
-		// 	checkResponse: func(t *testing.T, p *pb.CreateUserResponse, err error) {
-		// 		require.Error(t, err)
-		// 		require.Nil(t, p)
-		// 	},
-		// },
 		{
 			name: "DuplicateUsername",
 			req: &pb.CreateUserRequest{
@@ -176,6 +155,7 @@ func TestCreateUserAPI(t *testing.T) {
 			},
 			checkResponse: func(t *testing.T, p *pb.CreateUserResponse, err error) {
 				require.Error(t, err)
+				require.Equal(t, codes.AlreadyExists, status.Code(err))
 				require.Nil(t, p)
 			},
 		},
@@ -194,6 +174,7 @@ func TestCreateUserAPI(t *testing.T) {
 			},
 			checkResponse: func(t *testing.T, p *pb.CreateUserResponse, err error) {
 				require.Error(t, err)
+				require.Equal(t, codes.InvalidArgument, status.Code(err))
 				require.Nil(t, p)
 			},
 		},
@@ -211,6 +192,7 @@ func TestCreateUserAPI(t *testing.T) {
 
 			store := mockdb.NewMockStore(storectrl)
 			taskDistributor := mockworker.NewMockTaskDistributor(taskDistributorctrl)
+
 			tc.buildStubs(store, taskDistributor)
 
 			server := newTestServer(t, store, taskDistributor)
