@@ -17,14 +17,12 @@ import (
 )
 
 func (server *Server) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
-	log.Printf("create user request: username=%s, email=%s, fullName=%s", req.GetUsername(), req.GetEmail(), req.GetFullName())
 	violations := validateCreateUserRequest(req)
 	if violations != nil {
 		return nil, invalidArgumentError(violations)
 	}
 
 	hashedPassword, err := util.HashPassword(req.GetPassword())
-	log.Printf("hashedPassword: %s", hashedPassword)
 	if err != nil {
 		log.Printf("failed to hash password: %s", err)
 		return nil, status.Errorf(codes.Internal, "failed to hash password: %s", err)

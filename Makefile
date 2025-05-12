@@ -38,6 +38,7 @@ sqlc:
 
 mock: 
 	mockgen -destination db/mock/store.go -package mockdb github.com/guncv/Simple-Bank/db/sqlc Store
+	mockgen -destination worker/mock/distributor.go -package worker github.com/guncv/Simple-Bank/worker TaskDistributor
 
 test:
 	go test -v -cover -short ./...
