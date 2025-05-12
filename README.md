@@ -19,7 +19,7 @@ A modern banking backend service built in Go with high-performance APIs using **
 
 - **gRPC** for fast, type-safe RPCs
 - **gRPC-Gateway** provides RESTful HTTP APIs
-- **Gin** as a lightweight optional HTTP server alternative
+- **Gin** as a lightweight, optional HTTP server alternative
 
 ### 📧 Asynchronous Email Notification
 
@@ -73,7 +73,7 @@ A modern banking backend service built in Go with high-performance APIs using **
 .
 ├── db/                  # SQLC-generated queries and models
 ├── gapi/                # gRPC server implementation
-├── http/                # Gin server and handlers
+├── api/                 # Gin server and handlers
 ├── pb/                  # Protocol Buffers (compiled)
 ├── proto/               # .proto definitions
 ├── token/               # Token generation and validation
@@ -100,16 +100,8 @@ A modern banking backend service built in Go with high-performance APIs using **
 ### 🔧 Run Locally
 
 ```bash
-# Run PostgreSQL and Redis (via Docker or locally)
-make postgres
-make redis
-
-# Setup database
-make migrateup
-
 # Start servers
-make server         # gRPC server
-make http-server    # RESTful HTTP server via gRPC-Gateway
+make reset    # RESTful HTTP server via gRPC-Gateway and gRPC server with migration data
 ````
 
 ---
@@ -118,7 +110,6 @@ make http-server    # RESTful HTTP server via gRPC-Gateway
 
 ```bash
 make test          # Run all unit & API tests
-make cover         # View test coverage
 ```
 
 ---
